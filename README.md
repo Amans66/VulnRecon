@@ -1,163 +1,111 @@
-# VulnRecon (Sentinel Vulnerability Scanner v6.0)
+# VulnRecon 🛡️
 
-<p align="center">
-  <b>Enterprise-Grade Web Application Security Testing Platform & Orchestrator</b><br>
-  <i>Advanced Reconnaissance, Multi-Signal Vulnerability Detection, False-Positive Elimination & Unified Tool Integration</i>
-</p>
+Hey there! 👋 This is **VulnRecon**, a web vulnerability scanner and security assessment tool I built as a project. 
 
----
-
-## 🚀 Overview
-
-**VulnRecon** is an industrial-grade web application vulnerability scanner and security assessment orchestrator developed with a **Windows-first** architecture and cross-platform support.
-
-It moves beyond basic pattern matching by utilizing:
-- **Strict Evidence & Negative Control Validation**: No finding is confirmed solely because of a response anomaly. Every finding is re-tested with differential baselines, negative controls, and executable context verification.
-- **53 Active Detection Plugins**: 20 Host-level reconnaissance & misconfiguration modules and 33 Page-level injection & logic flaw modules.
-- **External Security Tool Integration**: Native detection and normalized adapters for industry-leading tools (Nmap, OWASP ZAP, Burp Suite, SQLMap, Dalfox, Nikto, WPScan, TShark).
-- **SpiderFoot & Recon-ng Style Attack Surface Graph**: Full asset entity modeling (`Domain -> Subdomain -> IP -> Service -> Technology -> Endpoint -> Parameter -> Finding`).
-- **Interactive Web Dashboard & Multi-Format Reporting**: SARIF, HTML, JSON, Markdown, and CSV reporting.
+I created this project because a lot of beginner/open-source vulnerability scanners I tested either threw a ton of false positives (marking things as vulnerable just because an error page popped up or text reflected) or were too basic. The goal of this project was to build a tool that actually tests and validates web vulnerabilities properly before reporting them.
 
 ---
 
-## 🛠️ Key Capabilities & Detection Engines
+## 💡 What does it do?
 
-### 1. Dalfox-Inspired 7-Layer XSS Engine (`core/xss_engine.py`)
-- Analyzes DOM reflection context: Executable script context, event handlers, attribute injection, or HTML-encoded text.
-- Eliminates false positives on safe reflections (e.g. entity-encoded parameters).
-- Supports mutation and evasion payload variants.
+Instead of just spamming payloads and looking for keywords, VulnRecon focuses on **accuracy and validation**:
 
-### 2. SQLMap-Inspired Injection Engine (`core/injection_engine.py`)
-- Multi-signal detection: Error-based signature matching (40+ DBMS signatures), Dual-boolean differential verification (`1=1` vs `1=2`), Time-based blind detection with 3-round verification delta.
-- Parameter characterization and DBMS fingerprinting.
-
-### 3. Technology-Specific Conditional Scanners (`core/tech_modules.py`)
-- Runs technology-targeted checks (e.g., WordPress/WPScan checks, Laravel debug modes, Django configurations) **only** when the corresponding technology stack is detected.
-
-### 4. Post-Scan Validation Engine (`core/validator.py`)
-- Findings are classified strictly into:
-  - `CONFIRMED`: Proven via reproducible payload execution and negative control differentials.
-  - `HIGH_CONFIDENCE`: Strong multi-signal corroboration.
-  - `NEEDS_MANUAL`: Potential vulnerability or behavioral anomaly that cannot be conclusively confirmed automatically.
-  - `FALSE_POSITIVE`: Filtered out before reporting.
-
-### 5. Windows-First External Security Tool Orchestration (`core/tool_manager.py`)
-- Auto-detects tool executables via `PATH`, default Windows paths (`C:\Program Files\...`), WSL, Docker, or REST APIs.
-- Supported Integrations:
-  - **Nmap**: Service discovery & machine-readable XML parsing (`-oX`)
-  - **OWASP ZAP**: Automation Framework & REST API connector
-  - **Burp Suite**: Enterprise REST API adapter
-  - **TShark / Wireshark**: Packet capture and protocol analysis
-  - **SQLMap**: Controlled DBMS injection verification
-  - **Dalfox**: Enhanced XSS scanning
-  - **Nikto**: Web server compound matchers
-  - **WPScan**: WordPress security auditing
+- **Checks if things are actually exploitable**: For example, in XSS tests it checks if the payload landed in an executable HTML context (like inside `<script>` or event handlers) rather than just being safely HTML-encoded.
+- **Differential testing for SQLi**: Uses boolean differentials (`1=1` vs `1=2`) and checks database error signatures against baseline responses.
+- **Technology-specific modules**: Only runs checks like WordPress or framework-specific tests if that technology is actually detected on the target.
+- **Tool integration**: Built a Windows-first adapter system to connect with tools like Nmap, OWASP ZAP, SQLMap, Dalfox, Nikto, and TShark if they are installed on the system.
+- **Web Dashboard**: Built an interactive UI dashboard (Flask) to visualize findings, attack surfaces, and scan progress in addition to terminal output.
 
 ---
 
-## 📂 Architecture
+## 📁 Project Structure
 
 ```text
 VulnRecon/
-├── main.py                     # CLI Entry Point & Scan Orchestrator
-├── config/
-│   ├── tools.yaml.example      # External tool configuration template
-│   └── tools.yaml              # Local custom tool paths / API keys
-├── core/
-│   ├── tool_manager.py         # External tool detector & runner
-│   ├── tool_registry.py        # Central external tool definitions
-│   ├── validator.py            # Independent reproduction & verification engine
-│   ├── injection_engine.py     # SQLMap-style injection detection
-│   ├── xss_engine.py           # Dalfox-style context-aware XSS detection
-│   ├── tech_modules.py         # Framework-specific modules (WordPress, Laravel, etc.)
-│   ├── workspace.py            # Attack surface entity graph
-│   ├── correlator.py           # Finding deduplication & attack chaining
-│   ├── http_client.py          # Resilient pooled session client
-│   └── adapters/               # Adapters for Nmap, ZAP, Burp, SQLMap, Dalfox, etc.
-├── plugins/                    # 53 Active Vulnerability Modules
-│   ├── sqli.py
-│   ├── xss.py
-│   ├── ssrf.py
-│   ├── idor.py
-│   └── ...
-├── dashboard/                  # Web UI Dashboard & Real-Time Monitoring
-└── tests/                      # Pytest Unit & Accuracy Benchmark Test Suites
+├── main.py               # Main CLI runner
+├── core/                 # Core scanning logic & validation engine
+│   ├── validator.py      # Double-checks findings to eliminate false positives
+│   ├── injection_engine.py # SQL injection logic & verification
+│   ├── xss_engine.py     # Context-aware XSS checking
+│   ├── tech_modules.py   # Technology detection & conditional checks
+│   ├── tool_manager.py   # Detection & execution of external tools
+│   ├── correlator.py     # Finding deduplication & attack chain linking
+│   └── adapters/         # Adapters for Nmap, ZAP, SQLMap, Dalfox, etc.
+├── plugins/              # Detection plugins (SQLi, XSS, SSRF, IDOR, etc.)
+├── dashboard/            # Local web dashboard UI
+├── config/               # Tool configs and settings
+└── tests/                # Unit tests and mock server test suite
 ```
 
 ---
 
-## ⚡ Installation & Setup
+## 🚀 Getting Started
 
 ### Requirements
-- Python 3.10+
-- Windows 10/11, Linux, or macOS
+- Python 3.10 or higher
+- Works on Windows, Linux, and macOS (tested primarily on Windows)
 
-### 1. Clone the Repository
+### 1. Clone the repo
 ```bash
 git clone https://github.com/Amans66/VulnRecon.git
 cd VulnRecon
 ```
 
-### 2. Install Dependencies
+### 2. Install dependencies
 ```bash
 pip install -r requirements.txt
 ```
 
-### 3. (Optional) Configure External Security Tools
-Copy the configuration template:
-```bash
-cp config/tools.yaml.example config/tools.yaml
-```
-Check which tools are detected on your system:
+### 3. Check tool integrations (Optional)
+If you have tools like Nmap, ZAP, or Wireshark/TShark installed, check their status:
 ```bash
 python main.py tools status
 ```
 
 ---
 
-## 📖 Usage Examples
+## 💻 How to Run
 
-### Check External Tool Status
+### Basic Scan
 ```bash
-python main.py tools status
+python main.py -u http://testphp.vulnweb.com --mode safe_active
 ```
 
-### Standard Web Application Scan
+### Run with the Web Dashboard
 ```bash
-python main.py -u https://example.com --mode safe_active
+python main.py -u http://testphp.vulnweb.com --dashboard
 ```
 
-### Deep Audit with Web Dashboard
+### Scan with specific external tools enabled
 ```bash
-python main.py -u https://example.com --mode deep --intensity 3 --dashboard
-```
-
-### Orchestrated Scan Using External Tools (e.g., Nmap, ZAP, SQLMap, Dalfox)
-```bash
-python main.py -u https://example.com --tools nmap,zap,dalfox,sqlmap
-```
-
-### Authenticated Scanning with Custom Profiles
-```bash
-python main.py -u https://example.com --auth-config auth_profiles.json
+python main.py -u http://testphp.vulnweb.com --tools nmap,sqlmap,dalfox
 ```
 
 ---
 
-## 🧪 Testing & Verification
+## 🧪 Testing
 
-Run the comprehensive unit and benchmark test suite:
+To run the automated tests against mock vulnerable endpoints:
 ```bash
 python -m pytest tests/ -v
 ```
 
-Verify that all 53 plugins load without errors:
+To verify all plugins load properly:
 ```bash
 python verify_plugins.py
 ```
 
 ---
 
-## ⚖️ Legal & Disclaimer
+## 📚 What I Learned Building This
 
-*This tool is intended strictly for authorized security assessments, penetration testing, and educational purposes. Scanning targets without prior mutual written consent is illegal.*
+- How differential response analysis works for blind vulnerabilities (time-based and boolean-based).
+- Handling false positives by parsing HTML contexts and validating against baseline responses.
+- Writing subprocess managers and adapters on Windows (handling paths, WSL, and REST APIs).
+- Structuring a modular Python project with plugins, test suites, and mock servers.
+
+---
+
+## ⚠️ Disclaimer
+
+*This project was developed for educational and authorized penetration testing purposes only. Please do not scan any websites or networks without proper permission.*
