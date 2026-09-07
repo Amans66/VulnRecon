@@ -1,0 +1,53 @@
+# Sentinel Vulnerability Scanner v6.0 — External Tools Configuration
+# Copy this file to config/tools.yaml and fill in your tool paths/API keys.
+tools:
+  nmap:
+    enabled: true
+    executable: "nmap"
+
+  tshark:
+    enabled: true
+    executable: "tshark"
+
+  zap:
+    enabled: true
+    api_url: "http://127.0.0.1:8080"
+    api_key_env: "ZAP_API_KEY"
+
+  burp:
+    enabled: true
+    api_url: "http://127.0.0.1:1337"
+    api_key_env: "BURP_API_KEY"
+
+  sqlmap:
+    enabled: true
+    executable: "sqlmap"
+
+  dalfox:
+    enabled: true
+    executable: "dalfox"
+
+  nikto:
+    enabled: true
+    executable: "nikto"
+
+  wpscan:
+    enabled: true
+    executable: "wpscan"
+
+  spiderfoot:
+    enabled: true
+    api_url: "http://127.0.0.1:5001"
+
+  nessus:
+    enabled: false
+    api_url: "https://127.0.0.1:8834"
+
+  openvas:
+    enabled: false
+    host: "127.0.0.1"
+    port: 9390
+
+  wazuh:
+    enabled: false
+    api_url: "https://127.0.0.1:55000"
